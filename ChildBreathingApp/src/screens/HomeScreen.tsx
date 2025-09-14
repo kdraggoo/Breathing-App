@@ -25,6 +25,10 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('BreathingDemo');
   };
 
+  const handleSensorDemoPress = () => {
+    navigation.navigate('SensorDemo');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -66,6 +70,14 @@ const HomeScreen: React.FC = () => {
           activeOpacity={0.8}
         >
           <Text style={styles.demoButtonText}>🫁 Breathing Status Demo</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.sensorButton}
+          onPress={handleSensorDemoPress}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.sensorButtonText}>🔬 Multi-Sensor Detection</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -156,6 +168,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   demoButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  sensorButton: {
+    backgroundColor: '#00B894',
+    padding: 15,
+    borderRadius: 15,
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  sensorButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

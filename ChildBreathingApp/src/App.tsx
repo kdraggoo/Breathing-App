@@ -7,6 +7,7 @@ import HomeScreen from './screens/HomeScreen';
 import ExerciseScreen from './screens/ExerciseScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import BreathingStatusDemo from './screens/BreathingStatusDemo';
+import SensorBreathingDemo from './screens/SensorBreathingDemo';
 
 const Stack = createStackNavigator();
 
@@ -47,6 +48,11 @@ const App: React.FC = () => {
           name="BreathingDemo" 
           component={BreathingStatusDemo}
           options={{ title: 'Breathing Status Demo' }}
+        />
+        <Stack.Screen 
+          name="SensorDemo" 
+          component={SensorBreathingDemo}
+          options={{ title: 'Multi-Sensor Detection' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

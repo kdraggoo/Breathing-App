@@ -1,14 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { BreathingStatus, BreathingState, BreathingDetectorConfig } from '../types';
+import MultiSensorBreathingDetector, { SensorType, SensorAvailability, FusedBreathingResult } from '../sensors/MultiSensorBreathingDetector';
 
-const DEFAULT_CONFIG: BreathingDetectorConfig = {
+interface ExtendedBreathingDetectorConfig extends BreathingDetectorConfig {
+  enabledSensors: SensorType[];
+  sensorFusion: boolean;
+}
+
+const DEFAULT_CONFIG: ExtendedBreathingDetectorConfig = {
   sensitivityThreshold: 0.3,
   pauseDetectionTime: 1000, // 1 second
   smoothingFactor: 0.7,
   manualMode: true, // Start with manual mode for better reliability
+  enabledSensors: ['microphone', 'accelerometer'],
+  sensorFusion: true,
 };
 
-export const useBreathingDetector = (config: Partial<BreathingDetectorConfig> = {}) => {
+export const useBreathingDetector = (config: Partial<ExtendedBreathingDetectorConfig> = {}) => {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
   
   const [breathingState, setBreathingState] = useState<BreathingState>({
@@ -19,10 +27,19 @@ export const useBreathingDetector = (config: Partial<BreathingDetectorConfig> = 
   });
 
   const [isDetecting, setIsDetecting] = useState(false);
+  const [sensorAvailability, setSensorAvailability] = useState<SensorAvailability>({
+    microphone: false,
+    accelerometer: false,
+    camera: false,
+  });
+  const [activeSensors, setActiveSensors] = useState<SensorType[]>([]);
+  const [sensorFusionResult, setSensorFusionResult] = useState<FusedBreathingResult | null>(null);
+
   const stateStartTime = useRef<number>(Date.now());
   const lastUpdateTime = useRef<number>(Date.now());
   const smoothedIntensity = useRef<number>(0);
   const pauseTimer = useRef<NodeJS.Timeout | null>(null);
+  const multiSensorDetector = useRef<MultiSensorBreathingDetector | null>(null);
   
   // Manual breathing detection methods
   const startBreathingIn = useCallback(() => {
@@ -79,15 +96,71 @@ export const useBreathingDetector = (config: Partial<BreathingDetectorConfig> = 
     }
   }, []);
 
-  const startDetection = useCallback(() => {
-    setIsDetecting(true);
-    stateStartTime.current = Date.now();
-  }, []);
+  // Initialize multi-sensor detector
+  useEffect(() => {
+    if (finalConfig.sensorFusion && !finalConfig.manualMode) {
+      multiSensorDetector.current = new MultiSensorBreathingDetector({
+        enabledSensors: finalConfig.enabledSensors,
+        fusionStrategy: 'weighted_average',
+        confidenceThreshold: finalConfig.sensitivityThreshold,
+      });
+
+      multiSensorDetector.current.setOnBreathingDetected((result: FusedBreathingResult) => {
+        setSensorFusionResult(result);
+        setActiveSensors(result.activeSensors);
+        
+        // Update breathing state from sensor fusion
+        const now = Date.now();
+        if (result.breathingState.status !== breathingState.status) {
+          stateStartTime.current = now;
+        }
+        
+        setBreathingState({
+          ...result.breathingState,
+          duration: now - stateStartTime.current,
+        });
+      });
+    }
+
+    return () => {
+      if (multiSensorDetector.current) {
+        multiSensorDetector.current.stopDetection();
+      }
+    };
+  }, [finalConfig.sensorFusion, finalConfig.manualMode, finalConfig.enabledSensors]);
+
+  const checkSensorAvailability = useCallback(async () => {
+    if (multiSensorDetector.current) {
+      const availability = await multiSensorDetector.current.checkSensorAvailability();
+      setSensorAvailability(availability);
+      return availability;
+    }
+    return sensorAvailability;
+  }, [sensorAvailability]);
+
+  const startDetection = useCallback(async () => {
+    if (finalConfig.manualMode) {
+      setIsDetecting(true);
+      stateStartTime.current = Date.now();
+      return true;
+    }
+
+    if (multiSensorDetector.current) {
+      const started = await multiSensorDetector.current.startDetection();
+      if (started) {
+        setIsDetecting(true);
+        stateStartTime.current = Date.now();
+        return true;
+      }
+    }
+    
+    return false;
+  }, [finalConfig.manualMode]);
 
   // Auto-detection based on patterns (for future sensor integration)
   const detectBreathingPattern = useCallback((intensity: number) => {
     const now = Date.now();
-    const deltaTime = now - lastUpdateTime.current;
+    // const deltaTime = now - lastUpdateTime.current;
     lastUpdateTime.current = now;
 
     // Smooth the intensity value
@@ -174,6 +247,12 @@ export const useBreathingDetector = (config: Partial<BreathingDetectorConfig> = 
     startPause,
     detectBreathingPattern, // For future sensor integration
     config: finalConfig,
+    // New sensor-related functionality
+    sensorAvailability,
+    activeSensors,
+    sensorFusionResult,
+    checkSensorAvailability,
+    multiSensorDetector: multiSensorDetector.current,
   };
 };
 

@@ -5,11 +5,10 @@ import {
   StyleSheet,
   Animated,
   TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import { BreathingStatus, BreathingState } from '../types';
 
-const { width } = Dimensions.get('window');
+// const { width } = Dimensions.get('window');
 
 interface BreathingStatusIndicatorProps {
   breathingState: BreathingState;

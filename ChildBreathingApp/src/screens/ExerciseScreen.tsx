@@ -6,15 +6,13 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Animated,
-  Dimensions,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getExerciseById } from '../utils/exercises';
-import { BreathingExercise } from '../types';
 import useBreathingDetector from '../hooks/useBreathingDetector';
 import BreathingStatusIndicator from '../components/BreathingStatusIndicator';
 
-const { width, height } = Dimensions.get('window');
+// const { width, height } = Dimensions.get('window');
 
 const ExerciseScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -26,7 +24,7 @@ const ExerciseScreen: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
   const [timeRemaining, setTimeRemaining] = useState(exercise?.duration || 60);
-  const [currentInstruction, setCurrentInstruction] = useState(0);
+  const [currentInstruction] = useState(0);
   const [showBreathingStatus, setShowBreathingStatus] = useState(true);
   
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
@@ -36,7 +34,7 @@ const ExerciseScreen: React.FC = () => {
   // Initialize breathing detector
   const {
     breathingState,
-    isDetecting,
+    // isDetecting,
     startDetection,
     stopDetection,
     startBreathingIn,
