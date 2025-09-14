@@ -1,5 +1,13 @@
 # 🌟 Child Breathing App
 
+[![CI](https://github.com/yourusername/ChildBreathingApp/workflows/CI/badge.svg)](https://github.com/yourusername/ChildBreathingApp/actions/workflows/ci.yml)
+[![Android Build](https://github.com/yourusername/ChildBreathingApp/workflows/Android%20Build/badge.svg)](https://github.com/yourusername/ChildBreathingApp/actions/workflows/android.yml)
+[![iOS Build](https://github.com/yourusername/ChildBreathingApp/workflows/iOS%20Build/badge.svg)](https://github.com/yourusername/ChildBreathingApp/actions/workflows/ios.yml)
+[![codecov](https://codecov.io/gh/yourusername/ChildBreathingApp/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/ChildBreathingApp)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=childbreathingapp&metric=alert_status)](https://sonarcloud.io/dashboard?id=childbreathingapp)
+
+A React Native app designed to help children with breathing exercises and mindfulness practices.
+
 A cross-platform mobile app designed to teach children breathing exercises through engaging, interactive experiences with kid-friendly visuals and sounds.
 
 ## ✨ Features
