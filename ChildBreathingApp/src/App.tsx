@@ -6,6 +6,7 @@ import { StatusBar } from 'react-native';
 import HomeScreen from './screens/HomeScreen';
 import ExerciseScreen from './screens/ExerciseScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import BreathingStatusDemo from './screens/BreathingStatusDemo';
 
 const Stack = createStackNavigator();
 
@@ -41,6 +42,11 @@ const App: React.FC = () => {
           name="Settings" 
           component={SettingsScreen}
           options={{ title: 'Settings' }}
+        />
+        <Stack.Screen 
+          name="BreathingDemo" 
+          component={BreathingStatusDemo}
+          options={{ title: 'Breathing Status Demo' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

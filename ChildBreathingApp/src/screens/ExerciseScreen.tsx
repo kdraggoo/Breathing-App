@@ -11,6 +11,8 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getExerciseById } from '../utils/exercises';
 import { BreathingExercise } from '../types';
+import useBreathingDetector from '../hooks/useBreathingDetector';
+import BreathingStatusIndicator from '../components/BreathingStatusIndicator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,10 +27,26 @@ const ExerciseScreen: React.FC = () => {
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
   const [timeRemaining, setTimeRemaining] = useState(exercise?.duration || 60);
   const [currentInstruction, setCurrentInstruction] = useState(0);
+  const [showBreathingStatus, setShowBreathingStatus] = useState(true);
   
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize breathing detector
+  const {
+    breathingState,
+    isDetecting,
+    startDetection,
+    stopDetection,
+    startBreathingIn,
+    startBreathingOut,
+    startPause,
+  } = useBreathingDetector({
+    manualMode: true,
+    sensitivityThreshold: 0.4,
+    pauseDetectionTime: 1500,
+  });
 
   useEffect(() => {
     if (isActive) {
@@ -111,12 +129,25 @@ const ExerciseScreen: React.FC = () => {
   };
 
   const handleStartStop = () => {
-    setIsActive(!isActive);
+    const newActiveState = !isActive;
+    setIsActive(newActiveState);
+    
+    // Start/stop breathing detection along with exercise
+    if (newActiveState) {
+      startDetection();
+    } else {
+      stopDetection();
+    }
   };
 
   const handleBack = () => {
     setIsActive(false);
+    stopDetection();
     navigation.goBack();
+  };
+
+  const toggleBreathingStatus = () => {
+    setShowBreathingStatus(!showBreathingStatus);
   };
 
   const getVisualComponent = () => {
@@ -229,6 +260,21 @@ const ExerciseScreen: React.FC = () => {
         {getVisualComponent()}
       </View>
 
+      {/* Breathing Status Indicator */}
+      {showBreathingStatus && isActive && (
+        <View style={styles.breathingStatusContainer}>
+          <BreathingStatusIndicator
+            breathingState={breathingState}
+            onBreathingIn={startBreathingIn}
+            onBreathingOut={startBreathingOut}
+            onPause={startPause}
+            showManualControls={true}
+            size="medium"
+            theme="colorful"
+          />
+        </View>
+      )}
+
       <View style={styles.instructionsContainer}>
         <Text style={styles.phaseText}>{getPhaseText()}</Text>
         <Text style={styles.instructionText}>
@@ -244,6 +290,16 @@ const ExerciseScreen: React.FC = () => {
         >
           <Text style={styles.startStopButtonText}>
             {isActive ? 'Pause' : 'Start'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={toggleBreathingStatus}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.toggleButtonText}>
+            {showBreathingStatus ? 'Hide Status' : 'Show Status'}
           </Text>
         </TouchableOpacity>
 
@@ -287,6 +343,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+  },
+  breathingStatusContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 15,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    width: '90%',
   },
   balloon: {
     width: 150,
@@ -380,6 +448,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  toggleButton: {
+    paddingHorizontal: 25,
+    paddingVertical: 8,
+    borderRadius: 15,
+    backgroundColor: '#74B9FF',
+    marginBottom: 10,
+  },
+  toggleButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   backButton: {
     paddingHorizontal: 30,
