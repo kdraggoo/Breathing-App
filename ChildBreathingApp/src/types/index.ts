@@ -30,3 +30,20 @@ export interface AppSettings {
   defaultDuration: number;
   theme: 'light' | 'dark' | 'colorful';
 }
+
+// Breathing Status Types
+export type BreathingStatus = 'breathing_in' | 'breathing_out' | 'pausing' | 'idle';
+
+export interface BreathingState {
+  status: BreathingStatus;
+  intensity: number; // 0-1, representing the strength/depth of breathing
+  duration: number; // how long in current state (milliseconds)
+  timestamp: number;
+}
+
+export interface BreathingDetectorConfig {
+  sensitivityThreshold: number; // 0-1, how sensitive the detection should be
+  pauseDetectionTime: number; // milliseconds to wait before considering it a pause
+  smoothingFactor: number; // 0-1, for smoothing sensor data
+  manualMode: boolean; // whether to use manual controls instead of sensor detection
+}

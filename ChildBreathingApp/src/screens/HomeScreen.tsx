@@ -21,6 +21,14 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('Settings');
   };
 
+  const handleBreathingDemoPress = () => {
+    navigation.navigate('BreathingDemo');
+  };
+
+  const handleSensorDemoPress = () => {
+    navigation.navigate('SensorDemo');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -55,6 +63,22 @@ const HomeScreen: React.FC = () => {
             </TouchableOpacity>
           ))}
         </View>
+
+        <TouchableOpacity
+          style={styles.demoButton}
+          onPress={handleBreathingDemoPress}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.demoButtonText}>🫁 Breathing Status Demo</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.sensorButton}
+          onPress={handleSensorDemoPress}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.sensorButtonText}>🔬 Multi-Sensor Detection</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.settingsButton}
@@ -136,11 +160,35 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     opacity: 0.8,
   },
+  demoButton: {
+    backgroundColor: '#6C5CE7',
+    padding: 15,
+    borderRadius: 15,
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  demoButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  sensorButton: {
+    backgroundColor: '#00B894',
+    padding: 15,
+    borderRadius: 15,
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  sensorButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   settingsButton: {
     backgroundColor: '#636E72',
     padding: 15,
     borderRadius: 15,
-    marginTop: 30,
+    marginTop: 15,
     alignItems: 'center',
   },
   settingsButtonText: {
