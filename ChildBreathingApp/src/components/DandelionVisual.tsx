@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import SoundManager from '../utils/soundManager';
 
 const { width, height } = Dimensions.get('window');
 
@@ -34,6 +35,7 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
   const flowerScale = useRef(new Animated.Value(1)).current;
   const stemOpacity = useRef(new Animated.Value(0)).current;
   const seedOpacity = useRef(new Animated.Value(0)).current;
+  const soundManager = SoundManager.getInstance();
 
   const handleBackgroundTap = () => {
     setIsDandelionBackground(prev => !prev);
@@ -75,6 +77,9 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
     const randomY = Math.random() * 200 + height / 2 - 50;
     const randomRotation = Math.random() * 720 - 360;
     
+    // Play subtle sound when petal starts floating
+    soundManager.playInhaleSound();
+    
     Animated.parallel([
       Animated.timing(petal.x, {
         toValue: randomX,
@@ -112,6 +117,9 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
     const randomX = Math.random() * width;
     const randomY = Math.random() * height;
     const randomRotation = Math.random() * 720 - 360;
+    
+    // Play subtle sound when seed starts scattering
+    soundManager.playExhaleSound();
     
     Animated.parallel([
       Animated.timing(seed.x, {

@@ -41,52 +41,65 @@ class SoundManager {
   private initializeSounds(): void {
     if (!Sound) return;
 
-    // Initialize placeholder sounds - in a real app, these would be actual audio files
-    // For now, we'll create simple beep sounds programmatically
-    
+    // Initialize actual sound files from assets
     // Breathing phase sounds
-    this.sounds.inhale = new Sound('inhale.mp3', Sound.MAIN_BUNDLE, (error) => {
+    this.sounds.inhale = new Sound('inhale_sound_4seconds.wav', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('Failed to load inhale sound', error);
+      } else {
+        console.log('Inhale sound loaded successfully');
       }
     });
 
-    this.sounds.exhale = new Sound('exhale.mp3', Sound.MAIN_BUNDLE, (error) => {
+    this.sounds.exhale = new Sound('exhale_sound_4seconds.wav', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('Failed to load exhale sound', error);
+      } else {
+        console.log('Exhale sound loaded successfully');
       }
     });
 
-    this.sounds.hold = new Sound('hold.mp3', Sound.MAIN_BUNDLE, (error) => {
+    // For hold phase, we'll use a shorter version of inhale sound
+    this.sounds.hold = new Sound('inhale_sound_4seconds.wav', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('Failed to load hold sound', error);
+      } else {
+        console.log('Hold sound loaded successfully');
       }
     });
 
-    // Exercise completion sound
-    this.sounds.completion = new Sound('completion.mp3', Sound.MAIN_BUNDLE, (error) => {
+    // Exercise completion sound - using exhale sound for now
+    this.sounds.completion = new Sound('exhale_sound_4seconds.wav', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('Failed to load completion sound', error);
+      } else {
+        console.log('Completion sound loaded successfully');
       }
     });
 
-    // Start/stop exercise sounds
-    this.sounds.start = new Sound('start.mp3', Sound.MAIN_BUNDLE, (error) => {
+    // Start/stop exercise sounds - using inhale for start, exhale for pause
+    this.sounds.start = new Sound('inhale_sound_4seconds.wav', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('Failed to load start sound', error);
+      } else {
+        console.log('Start sound loaded successfully');
       }
     });
 
-    this.sounds.pause = new Sound('pause.mp3', Sound.MAIN_BUNDLE, (error) => {
+    this.sounds.pause = new Sound('exhale_sound_4seconds.wav', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('Failed to load pause sound', error);
+      } else {
+        console.log('Pause sound loaded successfully');
       }
     });
 
-    // Background ambient sound
-    this.sounds.ambient = new Sound('ambient.mp3', Sound.MAIN_BUNDLE, (error) => {
+    // Background ambient sound - using inhale sound for ambient
+    this.sounds.ambient = new Sound('inhale_sound_4seconds.wav', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('Failed to load ambient sound', error);
+      } else {
+        console.log('Ambient sound loaded successfully');
       }
     });
   }
@@ -95,7 +108,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.inhale) {
-      this.sounds.inhale.setVolume(0.7);
+      this.sounds.inhale.setVolume(0.6);
       this.sounds.inhale.play();
     } else {
       this.fallbackManager.playInhaleSound();
@@ -106,7 +119,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.exhale) {
-      this.sounds.exhale.setVolume(0.7);
+      this.sounds.exhale.setVolume(0.6);
       this.sounds.exhale.play();
     } else {
       this.fallbackManager.playExhaleSound();
@@ -117,7 +130,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.hold) {
-      this.sounds.hold.setVolume(0.5);
+      this.sounds.hold.setVolume(0.3);
       this.sounds.hold.play();
     } else {
       this.fallbackManager.playHoldSound();
@@ -128,7 +141,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.completion) {
-      this.sounds.completion.setVolume(0.8);
+      this.sounds.completion.setVolume(0.7);
       this.sounds.completion.play();
     } else {
       this.fallbackManager.playCompletionSound();
@@ -139,7 +152,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.start) {
-      this.sounds.start.setVolume(0.6);
+      this.sounds.start.setVolume(0.5);
       this.sounds.start.play();
     } else {
       this.fallbackManager.playStartSound();
@@ -150,7 +163,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.pause) {
-      this.sounds.pause.setVolume(0.6);
+      this.sounds.pause.setVolume(0.5);
       this.sounds.pause.play();
     } else {
       this.fallbackManager.playPauseSound();
@@ -161,7 +174,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.ambient) {
-      this.sounds.ambient.setVolume(0.3);
+      this.sounds.ambient.setVolume(0.2);
       this.sounds.ambient.setNumberOfLoops(-1); // Loop indefinitely
       this.sounds.ambient.play();
     } else {

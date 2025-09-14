@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getExerciseById } from '../utils/exercises';
-import { BreathingExercise } from '../types';
+import { BreathingExercise, AppSettings } from '../types';
 import DandelionVisual from '../components/DandelionVisual';
+import SoundManager from '../utils/soundManager';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,6 +22,7 @@ const ExerciseScreen: React.FC = () => {
   const { exerciseId } = route.params as { exerciseId: string };
   
   const exercise = getExerciseById(exerciseId);
+  const soundManager = SoundManager.getInstance();
   
   const [isActive, setIsActive] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
@@ -30,6 +32,26 @@ const ExerciseScreen: React.FC = () => {
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize sound settings (in a real app, this would come from user preferences)
+  useEffect(() => {
+    const defaultSettings: AppSettings = {
+      soundEnabled: true,
+      vibrationEnabled: true,
+      defaultDuration: 60,
+      theme: 'light'
+    };
+    soundManager.updateSettings(defaultSettings);
+    
+    // Test sound loading
+    console.log('Sound manager initialized with settings:', defaultSettings);
+    console.log('Sound enabled:', soundManager.isSoundEnabled());
+
+    // Cleanup sound manager when component unmounts
+    return () => {
+      soundManager.stopAllSounds();
+    };
+  }, []);
 
   useEffect(() => {
     if (isActive) {
@@ -42,6 +64,8 @@ const ExerciseScreen: React.FC = () => {
   useEffect(() => {
     if (timeRemaining <= 0) {
       setIsActive(false);
+      console.log('Playing completion sound');
+      soundManager.playCompletionSound();
       // Exercise completed - could add completion celebration here
     }
   }, [timeRemaining]);
@@ -50,6 +74,8 @@ const ExerciseScreen: React.FC = () => {
     const breathingCycle = () => {
       // Inhale phase (4 seconds)
       setCurrentPhase('inhale');
+      console.log('Playing inhale sound');
+      soundManager.playInhaleSound();
       Animated.parallel([
         Animated.timing(scaleAnim, {
           toValue: 1.2,
@@ -66,10 +92,14 @@ const ExerciseScreen: React.FC = () => {
       setTimeout(() => {
         // Hold phase (2 seconds)
         setCurrentPhase('hold');
+        console.log('Playing hold sound');
+        soundManager.playHoldSound();
         
         setTimeout(() => {
           // Exhale phase (4 seconds)
           setCurrentPhase('exhale');
+          console.log('Playing exhale sound');
+          soundManager.playExhaleSound();
           Animated.parallel([
             Animated.timing(scaleAnim, {
               toValue: 0.5,
@@ -112,11 +142,19 @@ const ExerciseScreen: React.FC = () => {
   };
 
   const handleStartStop = () => {
+    if (isActive) {
+      console.log('Playing pause sound');
+      soundManager.playPauseSound();
+    } else {
+      console.log('Playing start sound');
+      soundManager.playStartSound();
+    }
     setIsActive(!isActive);
   };
 
   const handleBack = () => {
     setIsActive(false);
+    soundManager.stopAllSounds();
     navigation.goBack();
   };
 
