@@ -60,6 +60,21 @@ export const BREATHING_EXERCISES: BreathingExercise[] = [
     ],
     visualType: 'star',
     color: '#96CEB4'
+  },
+  {
+    id: 'dandelion-breathing',
+    name: 'Dandelion Breathing',
+    description: 'Watch the dandelion transform! Breathe in as petals fall, hold as seeds appear, and blow them away as you exhale.',
+    duration: 90,
+    instructions: [
+      'Look at the beautiful dandelion flower',
+      'Breathe in slowly as petals float toward you',
+      'Hold your breath as seeds appear on the stem',
+      'Breathe out gently to scatter the seeds away',
+      'Watch as new petals grow back on the flower'
+    ],
+    visualType: 'dandelion',
+    color: '#FDCB6E'
   }
 ];
 

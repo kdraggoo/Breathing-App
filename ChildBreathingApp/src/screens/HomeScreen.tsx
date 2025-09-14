@@ -44,6 +44,7 @@ const HomeScreen: React.FC = () => {
                 {exercise.visualType === 'flower' && '🌸'}
                 {exercise.visualType === 'rainbow' && '🌈'}
                 {exercise.visualType === 'star' && '⭐'}
+                {exercise.visualType === 'dandelion' && '🌼'}
               </Text>
               <Text style={styles.exerciseName}>{exercise.name}</Text>
               <Text style={styles.exerciseDescription}>

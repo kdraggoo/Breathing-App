@@ -11,6 +11,7 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getExerciseById } from '../utils/exercises';
 import { BreathingExercise } from '../types';
+import DandelionVisual from '../components/DandelionVisual';
 
 const { width, height } = Dimensions.get('window');
 
@@ -182,6 +183,13 @@ const ExerciseScreen: React.FC = () => {
           >
             <Text style={styles.rainbowText}>🌈</Text>
           </Animated.View>
+        );
+      case 'dandelion':
+        return (
+          <DandelionVisual
+            currentPhase={currentPhase}
+            isActive={isActive}
+          />
         );
       default:
         return null;

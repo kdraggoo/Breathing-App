@@ -4,7 +4,7 @@ export interface BreathingExercise {
   description: string;
   duration: number; // in seconds
   instructions: string[];
-  visualType: 'balloon' | 'flower' | 'rainbow' | 'star';
+  visualType: 'balloon' | 'flower' | 'rainbow' | 'star' | 'dandelion';
   color: string;
 }
 
