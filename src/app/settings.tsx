@@ -3,11 +3,14 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 import { BREATH_COUNTS, colors, PHASE_LIMITS, PRESETS, type PhaseDurations } from '@/constants/theme';
 import { updateSettings, useSettings } from '@/lib/settings';
 
-const PHASE_ROWS: { phase: keyof PhaseDurations; label: string }[] = [
+const PHASE_ROWS: { phase: keyof PhaseDurations; label: string; detail?: string }[] = [
   { phase: 'inhale', label: 'Breathe in' },
-  { phase: 'hold', label: 'Hold' },
+  { phase: 'hold', label: 'Hold', detail: 'after breathing in' },
   { phase: 'exhale', label: 'Blow out' },
+  { phase: 'holdOut', label: 'Hold', detail: 'after blowing out' },
 ];
+
+const PHASE_KEYS = PHASE_ROWS.map((r) => r.phase);
 
 function formatDuration(seconds: number) {
   if (seconds < 60) return `${seconds} seconds`;
@@ -18,13 +21,8 @@ function formatDuration(seconds: number) {
 
 export default function SettingsScreen() {
   const settings = useSettings();
-  const preset = PRESETS.find(
-    (p) =>
-      p.durations.inhale === settings.inhale &&
-      p.durations.hold === settings.hold &&
-      p.durations.exhale === settings.exhale,
-  );
-  const breathSeconds = settings.inhale + settings.hold + settings.exhale;
+  const preset = PRESETS.find((p) => PHASE_KEYS.every((k) => p.durations[k] === settings[k]));
+  const breathSeconds = PHASE_KEYS.reduce((sum, k) => sum + settings[k], 0);
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
@@ -48,10 +46,11 @@ export default function SettingsScreen() {
             if (match) updateSettings(match.durations);
           }}
         />
-        {PHASE_ROWS.map(({ phase, label }) => (
+        {PHASE_ROWS.map(({ phase, label, detail }) => (
           <Stepper
             key={phase}
             label={label}
+            detail={detail}
             value={settings[phase]}
             {...PHASE_LIMITS[phase]}
             onChange={(seconds) => updateSettings({ [phase]: seconds })}
@@ -92,12 +91,14 @@ function ToggleRow({ label, value, onChange }: { label: string; value: boolean; 
 
 function Stepper({
   label,
+  detail,
   value,
   min,
   max,
   onChange,
 }: {
   label: string;
+  detail?: string;
   value: number;
   min: number;
   max: number;
@@ -110,12 +111,15 @@ function Stepper({
       style={styles.row}
       accessible
       accessibilityRole="adjustable"
-      accessibilityLabel={label}
+      accessibilityLabel={detail ? `${label} ${detail}` : label}
       accessibilityValue={{ text: valueText }}
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
       onAccessibilityAction={(e) => step(e.nativeEvent.actionName === 'increment' ? 1 : -1)}
     >
-      <Text style={styles.rowLabel}>{label}</Text>
+      <View style={styles.rowText}>
+        <Text style={styles.rowLabel}>{label}</Text>
+        {detail && <Text style={styles.rowDetail}>{detail}</Text>}
+      </View>
       <View style={styles.stepper}>
         <StepButton symbol="−" disabled={value <= min} onPress={() => step(-1)} />
         <Text style={styles.stepValue}>{valueText}</Text>
@@ -183,6 +187,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   rowLabel: { fontSize: 17, color: colors.ink },
+  rowText: { flexShrink: 1, gap: 2 },
+  rowDetail: { fontSize: 13, color: colors.inkSoft },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   stepButton: {
     width: 40,

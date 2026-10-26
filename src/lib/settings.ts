@@ -29,6 +29,7 @@ function load(): Settings {
       inhale: clampPhase('inhale', saved.inhale, DEFAULTS.inhale),
       hold: clampPhase('hold', saved.hold, DEFAULTS.hold),
       exhale: clampPhase('exhale', saved.exhale, DEFAULTS.exhale),
+      holdOut: clampPhase('holdOut', saved.holdOut, DEFAULTS.holdOut),
     };
   } catch {
     return DEFAULTS;

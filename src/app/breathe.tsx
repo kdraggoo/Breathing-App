@@ -26,6 +26,7 @@ const PROMPTS: Record<Phase, { title: string; hint: string }> = {
   inhale: { title: 'Breathe in', hint: 'Slowly, through your nose' },
   hold: { title: 'Hold', hint: 'Just for a moment' },
   exhale: { title: 'Blow out', hint: 'Blow the seeds away' },
+  holdOut: { title: 'Hold', hint: 'Rest before the next breath' },
 };
 
 const READY_DELAY_MS = 1800;
@@ -36,7 +37,12 @@ export default function Breathe() {
   // Fixed for the life of the screen so timing can't shift mid-session.
   const [session] = useState(() => ({
     breaths: settings.breaths,
-    ...breathTiming({ inhale: settings.inhale * 1000, hold: settings.hold * 1000, exhale: settings.exhale * 1000 }),
+    ...breathTiming({
+      inhale: settings.inhale * 1000,
+      hold: settings.hold * 1000,
+      exhale: settings.exhale * 1000,
+      holdOut: settings.holdOut * 1000,
+    }),
   }));
   const cues = useBreathCues(settings);
   const reduceMotion = useReducedMotion();
@@ -82,7 +88,7 @@ export default function Breathe() {
 
   const onStep = useCallback(
     (step: number) => {
-      const b = Math.floor(step / 3);
+      const b = Math.floor(step / PHASES.length);
       setBreath(b);
       if (b >= session.breaths) {
         setStatus('done');
@@ -90,20 +96,20 @@ export default function Breathe() {
         AccessibilityInfo.announceForAccessibility('All done. Great breathing!');
         return;
       }
-      const p = PHASES[step % 3];
+      const p = PHASES[step % PHASES.length];
       setPhase(p);
-      if (p !== 'hold') cues.cue(p);
+      if (p === 'inhale' || p === 'exhale') cues.cue(p);
       AccessibilityInfo.announceForAccessibility(PROMPTS[p].title);
     },
     [session, cues],
   );
 
   useAnimatedReaction(
-    () => phaseStep(elapsed.value, session.inhaleEnd, session.exhaleStart),
+    () => phaseStep(elapsed.value, session),
     (step, prev) => {
       // Only forward progress counts; resetting for "again" moves backwards and is ignored.
       if (prev === null || step <= prev) return;
-      if (step % 3 === 2) fresh.value = 0;
+      if (step % 4 === 2) fresh.value = 0;
       scheduleOnRN(onStep, step);
     },
   );

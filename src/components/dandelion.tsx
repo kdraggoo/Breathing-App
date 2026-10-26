@@ -4,9 +4,9 @@ import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reani
 import Svg, { Circle, Ellipse, Line, Path } from 'react-native-svg';
 
 import { colors } from '@/constants/theme';
-import { breathAmount } from '@/lib/breath';
+import { breathAmount, type BreathTiming } from '@/lib/breath';
 
-type Timing = { inhaleEnd: number; exhaleStart: number };
+type Timing = BreathTiming;
 
 type Props = {
   width: number;
@@ -67,11 +67,11 @@ export function Dandelion({ width, height, elapsed, fresh, timing, reduceMotion 
   const cy = Math.max(R * 1.4, height * 0.36);
 
   const ringStyle = useAnimatedStyle(() => {
-    const b = breathAmount(elapsed.value, timing.inhaleEnd, timing.exhaleStart);
+    const b = breathAmount(elapsed.value, timing);
     return { opacity: 0.25 + 0.2 * b, transform: [{ scale: 0.72 + 0.3 * b }] };
   });
   const headStyle = useAnimatedStyle(() => {
-    const b = breathAmount(elapsed.value, timing.inhaleEnd, timing.exhaleStart);
+    const b = breathAmount(elapsed.value, timing);
     return { transform: [{ scale: 1 + 0.06 * b }] };
   });
 
@@ -136,8 +136,9 @@ function SeedView({ seed, R, cx, cy, width, height, elapsed, fresh, timing, redu
       // Seeds grow back during the first part of each inhale.
       if (fresh.value === 0) regrow = Math.min(1, c / (timing.inhaleEnd * 0.7));
     } else if (c >= timing.exhaleStart) {
-      // Each seed lets go at its own moment during the exhale and drifts off with the wind.
-      const e = (c - timing.exhaleStart) / (1 - timing.exhaleStart);
+      // Each seed lets go at its own moment during the exhale and drifts off with the wind;
+      // all are gone by the end of the exhale, leaving the head bare for the hold that follows.
+      const e = Math.min(1, (c - timing.exhaleStart) / (timing.exhaleEnd - timing.exhaleStart));
       fly = Math.min(1, Math.max(0, (e - seed.release) / 0.45));
     }
     const motion = reduceMotion ? 0.06 : 1;

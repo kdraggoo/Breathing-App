@@ -7,7 +7,7 @@ import { Dandelion } from '@/components/dandelion';
 import { Sky } from '@/components/sky';
 import { colors } from '@/constants/theme';
 
-const STILL = { inhaleEnd: 0.4, exhaleStart: 0.5 };
+const STILL = { inhaleEnd: 0.4, exhaleStart: 0.5, exhaleEnd: 1 };
 
 export default function Home() {
   const { width, height } = useWindowDimensions();
