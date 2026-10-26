@@ -1,10 +1,30 @@
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { BREATH_COUNTS, colors, PACES, type PaceId } from '@/constants/theme';
+import { BREATH_COUNTS, colors, PHASE_LIMITS, PRESETS, type PhaseDurations } from '@/constants/theme';
 import { updateSettings, useSettings } from '@/lib/settings';
+
+const PHASE_ROWS: { phase: keyof PhaseDurations; label: string }[] = [
+  { phase: 'inhale', label: 'Breathe in' },
+  { phase: 'hold', label: 'Hold' },
+  { phase: 'exhale', label: 'Blow out' },
+];
+
+function formatDuration(seconds: number) {
+  if (seconds < 60) return `${seconds} seconds`;
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${minutes} min${rest ? ` ${rest} sec` : ''}`;
+}
 
 export default function SettingsScreen() {
   const settings = useSettings();
+  const preset = PRESETS.find(
+    (p) =>
+      p.durations.inhale === settings.inhale &&
+      p.durations.hold === settings.hold &&
+      p.durations.exhale === settings.exhale,
+  );
+  const breathSeconds = settings.inhale + settings.hold + settings.exhale;
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
@@ -16,13 +36,30 @@ export default function SettingsScreen() {
         />
       </Section>
 
-      <Section title="Pace">
+      <Section title="Breath timing">
         <Segmented
-          options={(Object.keys(PACES) as PaceId[]).map((id) => ({ value: id, label: PACES[id].label }))}
-          value={settings.pace}
-          onChange={(pace) => updateSettings({ pace })}
+          options={[
+            ...PRESETS.map((p) => ({ value: p.label, label: p.label })),
+            ...(preset ? [] : [{ value: 'Custom', label: 'Custom' }]),
+          ]}
+          value={preset?.label ?? 'Custom'}
+          onChange={(label) => {
+            const match = PRESETS.find((p) => p.label === label);
+            if (match) updateSettings(match.durations);
+          }}
         />
-        <Text style={styles.hint}>{PACES[settings.pace].detail} seconds</Text>
+        {PHASE_ROWS.map(({ phase, label }) => (
+          <Stepper
+            key={phase}
+            label={label}
+            value={settings[phase]}
+            {...PHASE_LIMITS[phase]}
+            onChange={(seconds) => updateSettings({ [phase]: seconds })}
+          />
+        ))}
+        <Text style={styles.hint}>
+          One breath takes {breathSeconds} seconds. A session is about {formatDuration(breathSeconds * settings.breaths)}.
+        </Text>
       </Section>
 
       <Section title="Feedback">
@@ -50,6 +87,54 @@ function ToggleRow({ label, value, onChange }: { label: string; value: boolean; 
       <Text style={styles.rowLabel}>{label}</Text>
       <Switch value={value} onValueChange={onChange} accessibilityLabel={label} trackColor={{ true: colors.button }} />
     </View>
+  );
+}
+
+function Stepper({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+}) {
+  const valueText = value === 0 ? 'Off' : `${value} sec`;
+  const step = (delta: number) => onChange(Math.min(max, Math.max(min, value + delta)));
+  return (
+    <View
+      style={styles.row}
+      accessible
+      accessibilityRole="adjustable"
+      accessibilityLabel={label}
+      accessibilityValue={{ text: valueText }}
+      accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+      onAccessibilityAction={(e) => step(e.nativeEvent.actionName === 'increment' ? 1 : -1)}
+    >
+      <Text style={styles.rowLabel}>{label}</Text>
+      <View style={styles.stepper}>
+        <StepButton symbol="−" disabled={value <= min} onPress={() => step(-1)} />
+        <Text style={styles.stepValue}>{valueText}</Text>
+        <StepButton symbol="+" disabled={value >= max} onPress={() => step(1)} />
+      </View>
+    </View>
+  );
+}
+
+function StepButton({ symbol, disabled, onPress }: { symbol: string; disabled: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={6}
+      style={({ pressed }) => [styles.stepButton, pressed && styles.stepButtonPressed, disabled && styles.stepButtonDisabled]}
+    >
+      <Text style={styles.stepSymbol}>{symbol}</Text>
+    </Pressable>
   );
 }
 
@@ -98,6 +183,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   rowLabel: { fontSize: 17, color: colors.ink },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  stepButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#E3EAF0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepButtonPressed: { backgroundColor: '#CFD9E2' },
+  stepButtonDisabled: { opacity: 0.35 },
+  stepSymbol: { fontSize: 22, fontWeight: '600', color: colors.ink, lineHeight: 26 },
+  stepValue: { fontSize: 17, fontWeight: '600', color: colors.ink, minWidth: 56, textAlign: 'center' },
   segmented: { flexDirection: 'row', backgroundColor: '#E3EAF0', borderRadius: 12, padding: 4, gap: 4 },
   segment: { flex: 1, paddingVertical: 12, borderRadius: 9, alignItems: 'center' },
   segmentSelected: { backgroundColor: '#FFFFFF' },

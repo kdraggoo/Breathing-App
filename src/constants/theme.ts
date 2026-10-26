@@ -16,12 +16,19 @@ export const colors = {
   dotFull: '#FFFFFF',
 };
 
-export type PaceId = 'gentle' | 'slow';
+export type PhaseDurations = { inhale: number; hold: number; exhale: number };
 
-// Phase lengths in milliseconds for one breath.
-export const PACES: Record<PaceId, { label: string; detail: string; inhale: number; hold: number; exhale: number }> = {
-  gentle: { label: 'Gentle', detail: 'In 3 · hold 1 · out 4', inhale: 3000, hold: 1000, exhale: 4000 },
-  slow: { label: 'Slow', detail: 'In 4 · hold 2 · out 5', inhale: 4000, hold: 2000, exhale: 5000 },
+// Allowed seconds for each phase; hold may be 0 to skip it.
+export const PHASE_LIMITS: Record<keyof PhaseDurations, { min: number; max: number }> = {
+  inhale: { min: 2, max: 8 },
+  hold: { min: 0, max: 6 },
+  exhale: { min: 2, max: 10 },
 };
+
+// One-tap starting points for the per-phase settings, in seconds.
+export const PRESETS: { label: string; durations: PhaseDurations }[] = [
+  { label: 'Gentle', durations: { inhale: 3, hold: 1, exhale: 4 } },
+  { label: 'Slow', durations: { inhale: 4, hold: 2, exhale: 5 } },
+];
 
 export const BREATH_COUNTS = [3, 5, 8, 10];

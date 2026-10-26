@@ -15,7 +15,7 @@ import { scheduleOnRN, scheduleOnUI } from 'react-native-worklets';
 
 import { Dandelion } from '@/components/dandelion';
 import { Sky } from '@/components/sky';
-import { colors, PACES } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 import { breathTiming, type Phase, PHASES, phaseStep } from '@/lib/breath';
 import { useBreathCues } from '@/lib/feedback';
 import { useSettings } from '@/lib/settings';
@@ -34,7 +34,10 @@ export default function Breathe() {
   const { width, height } = useWindowDimensions();
   const settings = useSettings();
   // Fixed for the life of the screen so timing can't shift mid-session.
-  const [session] = useState(() => ({ breaths: settings.breaths, ...breathTiming(PACES[settings.pace]) }));
+  const [session] = useState(() => ({
+    breaths: settings.breaths,
+    ...breathTiming({ inhale: settings.inhale * 1000, hold: settings.hold * 1000, exhale: settings.exhale * 1000 }),
+  }));
   const cues = useBreathCues(settings);
   const reduceMotion = useReducedMotion();
 

@@ -1,22 +1,35 @@
 import Storage from 'expo-sqlite/kv-store';
 import { useSyncExternalStore } from 'react';
 
-import type { PaceId } from '@/constants/theme';
+import { PHASE_LIMITS, PRESETS, type PhaseDurations } from '@/constants/theme';
 
-export type Settings = {
+export type Settings = PhaseDurations & {
   sound: boolean;
   haptics: boolean;
   breaths: number;
-  pace: PaceId;
 };
 
 const KEY = 'settings';
-const DEFAULTS: Settings = { sound: true, haptics: true, breaths: 5, pace: 'gentle' };
+const DEFAULTS: Settings = { sound: true, haptics: true, breaths: 5, ...PRESETS[0].durations };
+
+function clampPhase(phase: keyof PhaseDurations, value: unknown, fallback: number) {
+  const { min, max } = PHASE_LIMITS[phase];
+  return typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, Math.round(value))) : fallback;
+}
 
 function load(): Settings {
   try {
     const raw = Storage.getItemSync(KEY);
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+    if (!raw) return DEFAULTS;
+    const saved = { ...DEFAULTS, ...JSON.parse(raw) };
+    return {
+      sound: saved.sound,
+      haptics: saved.haptics,
+      breaths: saved.breaths,
+      inhale: clampPhase('inhale', saved.inhale, DEFAULTS.inhale),
+      hold: clampPhase('hold', saved.hold, DEFAULTS.hold),
+      exhale: clampPhase('exhale', saved.exhale, DEFAULTS.exhale),
+    };
   } catch {
     return DEFAULTS;
   }
