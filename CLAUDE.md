@@ -16,6 +16,7 @@ npx tsc --noEmit            # typecheck
 npx expo lint               # lint
 npx expo-doctor             # dependency/config health
 node scripts/generate-sounds.mjs   # regenerate assets/sounds/*.wav
+python3 scripts/generate-icons.py  # regenerate app icon, Android icon layers, splash, favicon (needs Pillow)
 npx eas-cli@latest build --profile development|preview|production --platform ios|android
 npx eas-cli@latest submit --platform ios|android
 ```
