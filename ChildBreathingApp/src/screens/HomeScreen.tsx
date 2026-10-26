@@ -22,7 +22,7 @@ const HomeScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>Welcome to Breathing Fun! 🌟</Text>
@@ -65,7 +65,7 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.settingsButtonText}>⚙️ Settings</Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -75,7 +75,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F9FA',
   },
   scrollContent: {
+    flexGrow: 1,
     padding: 20,
+    paddingTop: 60,
     paddingBottom: 40,
   },
   header: {

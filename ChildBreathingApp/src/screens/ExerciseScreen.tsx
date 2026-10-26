@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getExerciseById } from '../utils/exercises';
 import { BreathingExercise, AppSettings } from '../types';
 import DandelionVisual from '../components/DandelionVisual';
@@ -24,28 +25,51 @@ const ExerciseScreen: React.FC = () => {
   const exercise = getExerciseById(exerciseId);
   const soundManager = SoundManager.getInstance();
   
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [currentPhase, setCurrentPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
   const [timeRemaining, setTimeRemaining] = useState(exercise?.duration || 60);
   const [currentInstruction, setCurrentInstruction] = useState(0);
+  const [phaseProgress, setPhaseProgress] = useState(0);
+  const [phaseStartTime, setPhaseStartTime] = useState<number>(0);
   
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize sound settings (in a real app, this would come from user preferences)
+  // Initialize sound settings from user preferences
   useEffect(() => {
-    const defaultSettings: AppSettings = {
-      soundEnabled: true,
-      vibrationEnabled: true,
-      defaultDuration: 60,
-      theme: 'light'
+    const loadSettings = async () => {
+      try {
+        const savedSettings = await AsyncStorage.getItem('appSettings');
+        const settings: AppSettings = savedSettings 
+          ? JSON.parse(savedSettings)
+          : {
+              soundEnabled: true,
+              soundVolume: 0.6,
+              vibrationEnabled: true,
+              defaultDuration: 60,
+              theme: 'light'
+            };
+        
+        soundManager.updateSettings(settings);
+        console.log('Sound manager initialized with settings:', settings);
+        console.log('Sound enabled:', soundManager.isSoundEnabled());
+        console.log('Sound volume:', settings.soundVolume);
+      } catch (error) {
+        console.error('Error loading settings:', error);
+        // Use default settings if loading fails
+        const defaultSettings: AppSettings = {
+          soundEnabled: true,
+          soundVolume: 0.6,
+          vibrationEnabled: true,
+          defaultDuration: 60,
+          theme: 'light'
+        };
+        soundManager.updateSettings(defaultSettings);
+      }
     };
-    soundManager.updateSettings(defaultSettings);
-    
-    // Test sound loading
-    console.log('Sound manager initialized with settings:', defaultSettings);
-    console.log('Sound enabled:', soundManager.isSoundEnabled());
+
+    loadSettings();
 
     // Cleanup sound manager when component unmounts
     return () => {
@@ -54,16 +78,11 @@ const ExerciseScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isActive) {
-      startBreathingCycle();
-    } else {
-      stopBreathingCycle();
-    }
-  }, [isActive]);
+    startBreathingCycle();
+  }, []);
 
   useEffect(() => {
     if (timeRemaining <= 0) {
-      setIsActive(false);
       console.log('Playing completion sound');
       soundManager.playCompletionSound();
       // Exercise completed - could add completion celebration here
@@ -74,8 +93,18 @@ const ExerciseScreen: React.FC = () => {
     const breathingCycle = () => {
       // Inhale phase (4 seconds)
       setCurrentPhase('inhale');
+      setPhaseStartTime(Date.now());
+      setPhaseProgress(0);
       console.log('Playing inhale sound');
       soundManager.playInhaleSound();
+      
+      // Update progress during inhale
+      const inhaleInterval = setInterval(() => {
+        const elapsed = Date.now() - phaseStartTime;
+        const progress = Math.min(elapsed / 4000, 1);
+        setPhaseProgress(progress);
+      }, 50);
+      
       Animated.parallel([
         Animated.timing(scaleAnim, {
           toValue: 1.2,
@@ -90,16 +119,29 @@ const ExerciseScreen: React.FC = () => {
       ]).start();
 
       setTimeout(() => {
+        clearInterval(inhaleInterval);
         // Hold phase (2 seconds)
         setCurrentPhase('hold');
+        setPhaseStartTime(Date.now());
+        setPhaseProgress(0);
         console.log('Playing hold sound');
         soundManager.playHoldSound();
         
         setTimeout(() => {
           // Exhale phase (4 seconds)
           setCurrentPhase('exhale');
+          setPhaseStartTime(Date.now());
+          setPhaseProgress(0);
           console.log('Playing exhale sound');
           soundManager.playExhaleSound();
+          
+          // Update progress during exhale
+          const exhaleInterval = setInterval(() => {
+            const elapsed = Date.now() - phaseStartTime;
+            const progress = Math.min(elapsed / 4000, 1);
+            setPhaseProgress(progress);
+          }, 50);
+          
           Animated.parallel([
             Animated.timing(scaleAnim, {
               toValue: 0.5,
@@ -111,7 +153,9 @@ const ExerciseScreen: React.FC = () => {
               duration: 4000,
               useNativeDriver: true,
             }),
-          ]).start();
+          ]).start(() => {
+            clearInterval(exhaleInterval);
+          });
         }, 2000);
       }, 4000);
     };
@@ -141,22 +185,7 @@ const ExerciseScreen: React.FC = () => {
     setCurrentPhase('inhale');
   };
 
-  const handleStartStop = () => {
-    if (isActive) {
-      console.log('Playing pause sound');
-      soundManager.playPauseSound();
-    } else {
-      console.log('Playing start sound');
-      soundManager.playStartSound();
-    }
-    setIsActive(!isActive);
-  };
 
-  const handleBack = () => {
-    setIsActive(false);
-    soundManager.stopAllSounds();
-    navigation.goBack();
-  };
 
   const getVisualComponent = () => {
     if (!exercise) return null;
@@ -227,6 +256,7 @@ const ExerciseScreen: React.FC = () => {
           <DandelionVisual
             currentPhase={currentPhase}
             isActive={isActive}
+            phaseProgress={phaseProgress}
           />
         );
       default:
@@ -255,17 +285,31 @@ const ExerciseScreen: React.FC = () => {
 
   if (!exercise) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Text style={styles.errorText}>Exercise not found</Text>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Text style={styles.backButtonText}>Go Back</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 
+  // Special full-screen experience for Dandelion Breathing
+  if (exercise.visualType === 'dandelion') {
+
+    return (
+      <View style={styles.fullScreenContainer}>
+        <DandelionVisual
+          currentPhase={currentPhase}
+          isActive={isActive}
+          phaseProgress={phaseProgress}
+        />
+        
+        
+      </View>
+    );
+  }
+
+  // Standard exercise view for other exercises
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.exerciseName}>{exercise.name}</Text>
         <Text style={styles.timer}>{formatTime(timeRemaining)}</Text>
@@ -282,26 +326,7 @@ const ExerciseScreen: React.FC = () => {
         </Text>
       </View>
 
-      <View style={styles.controlsContainer}>
-        <TouchableOpacity
-          style={[styles.startStopButton, { backgroundColor: isActive ? '#E17055' : '#00B894' }]}
-          onPress={handleStartStop}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.startStopButtonText}>
-            {isActive ? 'Pause' : 'Start'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.backButtonText}>Back to Home</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -311,11 +336,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F9FA',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 20,
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  fullScreenContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
+  fullScreenTouchArea: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
   },
   header: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
   exerciseName: {
     fontSize: 24,
@@ -409,34 +450,6 @@ const styles = StyleSheet.create({
     color: '#636E72',
     textAlign: 'center',
     lineHeight: 22,
-  },
-  controlsContainer: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 15,
-  },
-  startStopButton: {
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 25,
-    minWidth: 150,
-    alignItems: 'center',
-  },
-  startStopButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  backButton: {
-    paddingHorizontal: 30,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#636E72',
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
   errorText: {
     fontSize: 18,

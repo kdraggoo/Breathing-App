@@ -10,12 +10,14 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Slider from '@react-native-community/slider';
 import { AppSettings } from '../types';
 
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation();
   const [settings, setSettings] = useState<AppSettings>({
     soundEnabled: true,
+    soundVolume: 0.6,
     vibrationEnabled: true,
     defaultDuration: 60,
     theme: 'colorful',
@@ -50,6 +52,11 @@ const SettingsScreen: React.FC = () => {
     saveSettings(newSettings);
   };
 
+  const handleVolumeChange = (value: number) => {
+    const newSettings = { ...settings, soundVolume: value };
+    saveSettings(newSettings);
+  };
+
   const handleVibrationToggle = (value: boolean) => {
     const newSettings = { ...settings, vibrationEnabled: value };
     saveSettings(newSettings);
@@ -71,7 +78,7 @@ const SettingsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🔊 Audio Settings</Text>
@@ -89,6 +96,33 @@ const SettingsScreen: React.FC = () => {
               trackColor={{ false: '#ddd', true: '#6C5CE7' }}
               thumbColor={settings.soundEnabled ? '#fff' : '#f4f3f4'}
             />
+          </View>
+
+          <View style={styles.volumeContainer}>
+            <View style={styles.volumeInfo}>
+              <Text style={styles.settingLabel}>Volume</Text>
+              <Text style={styles.settingDescription}>
+                Adjust sound effects volume
+              </Text>
+            </View>
+            <View style={styles.volumeSliderContainer}>
+              <Text style={styles.volumeLabel}>🔇</Text>
+              <Slider
+                style={styles.volumeSlider}
+                minimumValue={0}
+                maximumValue={1}
+                value={settings.soundVolume}
+                onValueChange={handleVolumeChange}
+                minimumTrackTintColor="#6C5CE7"
+                maximumTrackTintColor="#ddd"
+                thumbStyle={styles.sliderThumb}
+                trackStyle={styles.sliderTrack}
+              />
+              <Text style={styles.volumeLabel}>🔊</Text>
+            </View>
+            <Text style={styles.volumeValue}>
+              {Math.round(settings.soundVolume * 100)}%
+            </Text>
           </View>
 
           <View style={styles.settingRow}>
@@ -188,15 +222,8 @@ const SettingsScreen: React.FC = () => {
           </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.backButtonText}>← Back to Home</Text>
-        </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -206,7 +233,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F9FA',
   },
   scrollContent: {
+    flexGrow: 1,
     padding: 20,
+    paddingTop: 60,
     paddingBottom: 40,
   },
   section: {
@@ -246,6 +275,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#636E72',
     lineHeight: 18,
+  },
+  volumeContainer: {
+    marginBottom: 15,
+  },
+  volumeInfo: {
+    marginBottom: 10,
+  },
+  volumeSliderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  volumeLabel: {
+    fontSize: 16,
+    marginHorizontal: 8,
+  },
+  volumeSlider: {
+    flex: 1,
+    height: 40,
+  },
+  sliderThumb: {
+    backgroundColor: '#6C5CE7',
+    width: 20,
+    height: 20,
+  },
+  sliderTrack: {
+    height: 4,
+    borderRadius: 2,
+  },
+  volumeValue: {
+    fontSize: 14,
+    color: '#6C5CE7',
+    fontWeight: '600',
+    textAlign: 'center',
   },
   durationButtons: {
     flexDirection: 'row',
@@ -316,18 +379,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#A0A0A0',
     fontWeight: '500',
-  },
-  backButton: {
-    backgroundColor: '#6C5CE7',
-    paddingVertical: 15,
-    borderRadius: 15,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 

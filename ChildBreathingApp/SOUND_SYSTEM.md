@@ -41,19 +41,27 @@ The sound system is integrated into:
 ## Settings
 Sound can be controlled via the `AppSettings` interface:
 - `soundEnabled: boolean` - Enable/disable all sounds
+- `soundVolume: number` - Volume level (0.0 to 1.0)
 - `vibrationEnabled: boolean` - Enable/disable vibration (future feature)
 
 ## Volume Levels
-- Inhale/Exhale: 0.6 (60%)
-- Hold: 0.3 (30%)
-- Start/Pause: 0.5 (50%)
-- Completion: 0.7 (70%)
-- Ambient: 0.2 (20%)
+Base volume levels (multiplied by user volume setting):
+- Inhale/Exhale: 0.6 × userVolume
+- Hold: 0.3 × userVolume  
+- Start/Pause: 0.5 × userVolume
+- Completion: 0.7 × userVolume
+- Ambient: 0.2 × userVolume
+
+User can adjust volume from 0% to 100% via settings slider.
 
 ## Testing
-Run the test script to verify sound system functionality:
+Run the test scripts to verify sound system functionality:
 ```bash
+# Test basic sound functionality
 node test-sounds.js
+
+# Test volume control
+node test-volume.js
 ```
 
 ## Debugging

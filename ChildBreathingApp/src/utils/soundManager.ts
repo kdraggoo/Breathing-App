@@ -108,7 +108,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.inhale) {
-      this.sounds.inhale.setVolume(0.6);
+      this.sounds.inhale.setVolume(0.6 * (this.settings?.soundVolume || 0.6));
       this.sounds.inhale.play();
     } else {
       this.fallbackManager.playInhaleSound();
@@ -119,7 +119,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.exhale) {
-      this.sounds.exhale.setVolume(0.6);
+      this.sounds.exhale.setVolume(0.6 * (this.settings?.soundVolume || 0.6));
       this.sounds.exhale.play();
     } else {
       this.fallbackManager.playExhaleSound();
@@ -130,7 +130,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.hold) {
-      this.sounds.hold.setVolume(0.3);
+      this.sounds.hold.setVolume(0.3 * (this.settings?.soundVolume || 0.6));
       this.sounds.hold.play();
     } else {
       this.fallbackManager.playHoldSound();
@@ -141,7 +141,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.completion) {
-      this.sounds.completion.setVolume(0.7);
+      this.sounds.completion.setVolume(0.7 * (this.settings?.soundVolume || 0.6));
       this.sounds.completion.play();
     } else {
       this.fallbackManager.playCompletionSound();
@@ -152,7 +152,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.start) {
-      this.sounds.start.setVolume(0.5);
+      this.sounds.start.setVolume(0.5 * (this.settings?.soundVolume || 0.6));
       this.sounds.start.play();
     } else {
       this.fallbackManager.playStartSound();
@@ -163,7 +163,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.pause) {
-      this.sounds.pause.setVolume(0.5);
+      this.sounds.pause.setVolume(0.5 * (this.settings?.soundVolume || 0.6));
       this.sounds.pause.play();
     } else {
       this.fallbackManager.playPauseSound();
@@ -174,7 +174,7 @@ class SoundManager {
     if (!this.isEnabled) return;
     
     if (Sound && this.sounds.ambient) {
-      this.sounds.ambient.setVolume(0.2);
+      this.sounds.ambient.setVolume(0.2 * (this.settings?.soundVolume || 0.6));
       this.sounds.ambient.setNumberOfLoops(-1); // Loop indefinitely
       this.sounds.ambient.play();
     } else {

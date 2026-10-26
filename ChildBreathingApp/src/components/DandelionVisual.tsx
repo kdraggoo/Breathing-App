@@ -8,12 +8,15 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import SoundManager from '../utils/soundManager';
+import DandelionStateManager from '../utils/dandelionStateManager';
+import { DandelionState } from '../types';
 
 const { width, height } = Dimensions.get('window');
 
 interface DandelionVisualProps {
   currentPhase: 'inhale' | 'hold' | 'exhale';
   isActive: boolean;
+  phaseProgress?: number; // 0-1 progress within current phase
 }
 
 interface FloatingElement {
@@ -25,17 +28,25 @@ interface FloatingElement {
   opacity: Animated.Value;
 }
 
-const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActive }) => {
+const DandelionVisual: React.FC<DandelionVisualProps> = ({ 
+  currentPhase, 
+  isActive, 
+  phaseProgress = 0 
+}) => {
   const [floatingPetals, setFloatingPetals] = React.useState<FloatingElement[]>([]);
   const [floatingSeeds, setFloatingSeeds] = React.useState<FloatingElement[]>([]);
   const [petalIdCounter, setPetalIdCounter] = React.useState(0);
   const [seedIdCounter, setSeedIdCounter] = React.useState(0);
   const [isDandelionBackground, setIsDandelionBackground] = useState(true);
+  const [dandelionState, setDandelionState] = useState<DandelionState>({
+    petalCount: 40,
+    seedCount: 0,
+    phase: 'inhale',
+    progress: 0
+  });
   
-  const flowerScale = useRef(new Animated.Value(1)).current;
-  const stemOpacity = useRef(new Animated.Value(0)).current;
-  const seedOpacity = useRef(new Animated.Value(0)).current;
   const soundManager = SoundManager.getInstance();
+  const stateManager = DandelionStateManager.getInstance();
 
   const handleBackgroundTap = () => {
     setIsDandelionBackground(prev => !prev);
@@ -48,8 +59,8 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
     
     return {
       id,
-      x: new Animated.Value(width / 2),
-      y: new Animated.Value(height / 2 - 100),
+      x: new Animated.Value(width / 2 - 100), // Center of petal aligns with stem center (subtract half petal width)
+      y: new Animated.Value(height / 2 - 200), // Bottom of petal aligns with top of stem (subtract full petal height)
       rotation: new Animated.Value(0),
       scale: new Animated.Value(0.8),
       opacity: new Animated.Value(1),
@@ -63,8 +74,8 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
     
     return {
       id,
-      x: new Animated.Value(width / 2),
-      y: new Animated.Value(height / 2 - 100),
+      x: new Animated.Value(width / 2 - 100), // Center of seed aligns with stem center (subtract half seed width)
+      y: new Animated.Value(height / 2 - 200), // Bottom of seed aligns with top of stem (subtract full seed height)
       rotation: new Animated.Value(0),
       scale: new Animated.Value(0.6),
       opacity: new Animated.Value(1),
@@ -73,7 +84,7 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
 
   // Animate petal floating toward user
   const animatePetalFloat = (petal: FloatingElement) => {
-    const randomX = Math.random() * (width - 100) + 50;
+    const randomX = Math.random() * (width - 200) + 100;
     const randomY = Math.random() * 200 + height / 2 - 50;
     const randomRotation = Math.random() * 720 - 360;
     
@@ -114,8 +125,8 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
 
   // Animate seed scattering away from user
   const animateSeedScatter = (seed: FloatingElement) => {
-    const randomX = Math.random() * width;
-    const randomY = Math.random() * height;
+    const randomX = Math.random() * (width - 200) + 100;
+    const randomY = Math.random() * (height - 200) + 100;
     const randomRotation = Math.random() * 720 - 360;
     
     // Play subtle sound when seed starts scattering
@@ -153,69 +164,42 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
     });
   };
 
+  // Update dandelion state based on breathing phase and progress
   useEffect(() => {
     if (!isActive) return;
 
-    switch (currentPhase) {
-      case 'inhale':
-        // Petals fall off and float toward user
-        const newPetal = createFloatingPetal();
-        setFloatingPetals(prev => [...prev, newPetal]);
-        setTimeout(() => animatePetalFloat(newPetal), 100);
-        
-        // Slightly shrink the flower
-        Animated.timing(flowerScale, {
-          toValue: 0.9,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start();
-        break;
+    const previousState = dandelionState;
+    const newState = stateManager.updateState(currentPhase, phaseProgress);
+    setDandelionState(newState);
 
-      case 'hold':
-        // Show seeds on stem
-        Animated.parallel([
-          Animated.timing(stemOpacity, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(seedOpacity, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-        ]).start();
-        break;
-
-      case 'exhale':
-        // Seeds scatter away
-        const newSeed = createFloatingSeed();
-        setFloatingSeeds(prev => [...prev, newSeed]);
-        setTimeout(() => animateSeedScatter(newSeed), 100);
-        
-        // Hide seeds on stem
-        Animated.parallel([
-          Animated.timing(stemOpacity, {
-            toValue: 0,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(seedOpacity, {
-            toValue: 0,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-        ]).start();
-        
-        // Flower grows back to normal size
-        Animated.timing(flowerScale, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start();
-        break;
+    // Check if we should create floating elements
+    const shouldCreate = stateManager.shouldCreateFloatingElement(previousState);
+    
+    if (shouldCreate.createPetal) {
+      const newPetal = createFloatingPetal();
+      setFloatingPetals(prev => [...prev, newPetal]);
+      setTimeout(() => animatePetalFloat(newPetal), 100);
     }
-  }, [currentPhase, isActive]);
+    
+    if (shouldCreate.createSeed) {
+      const newSeed = createFloatingSeed();
+      setFloatingSeeds(prev => [...prev, newSeed]);
+      setTimeout(() => animateSeedScatter(newSeed), 100);
+    }
+  }, [currentPhase, phaseProgress, isActive]);
+
+  // Reset dandelion state when exercise stops
+  useEffect(() => {
+    if (!isActive) {
+      stateManager.reset();
+      setDandelionState({
+        petalCount: 40,
+        seedCount: 0,
+        phase: 'inhale',
+        progress: 0
+      });
+    }
+  }, [isActive]);
 
   const renderFloatingPetals = () => {
     return floatingPetals.map((petal) => {
@@ -306,46 +290,30 @@ const DandelionVisual: React.FC<DandelionVisualProps> = ({ currentPhase, isActiv
         style={[
           styles.flowerContainer,
           {
-            transform: [{ scale: flowerScale }],
+            transform: [
+              { translateX: -100 }, // Half of container width (200px / 2)
+              { translateY: -100 }  // Half of container height (200px / 2)
+            ],
           },
         ]}
       >
-        <Image
-          source={require('../../assets/Dandelion_Flower_with_Background.png')}
-          style={styles.flowerImage}
-          resizeMode="contain"
-        />
-      </Animated.View>
-
-      {/* Stem with seeds (appears during hold phase) */}
-      <Animated.View
-        style={[
-          styles.stemContainer,
-          {
-            opacity: stemOpacity,
-          },
-        ]}
-      >
+        {/* Dandelion stem */}
         <Image
           source={require('../../assets/Dandelion_Stem.png')}
           style={styles.stemImage}
           resizeMode="contain"
         />
-        <Animated.View
-          style={[
-            styles.seedsContainer,
-            {
-              opacity: seedOpacity,
-            },
-          ]}
-        >
+        
+        {/* Dynamic dandelion head based on current state */}
+        {stateManager.getDandelionHeadImageSource() && (
           <Image
-            source={require('../../assets/Dandelion_Seed.png')}
-            style={styles.seedOnStemImage}
+            source={stateManager.getDandelionHeadImageSource()}
+            style={styles.headImage}
             resizeMode="contain"
           />
-        </Animated.View>
+        )}
       </Animated.View>
+
 
       {/* Floating petals */}
       {renderFloatingPetals()}
@@ -378,41 +346,29 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{ translateX: -100 }, { translateY: -100 }],
     width: 200,
     height: 200,
-  },
-  flowerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  stemContainer: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-    width: 100,
-    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   stemImage: {
     width: '100%',
     height: '100%',
-  },
-  seedsContainer: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
+    zIndex: 1,
   },
-  seedOnStemImage: {
-    width: '100%',
-    height: '100%',
+  headImage: {
+    width: '80%',
+    height: '80%',
+    position: 'absolute',
+    top: '10%',
+    left: '10%',
+    zIndex: 2,
   },
   floatingElement: {
     position: 'absolute',
-    width: 40,
-    height: 40,
+    width: 200,
+    height: 200,
   },
   petalImage: {
     width: '100%',

@@ -16,15 +16,7 @@ const App: React.FC = () => {
       <Stack.Navigator
         initialRouteName="Home"
         screenOptions={{
-          headerStyle: {
-            backgroundColor: '#6C5CE7',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 20,
-          },
-          headerTitleAlign: 'center',
+          headerShown: false,
         }}
       >
         <Stack.Screen 

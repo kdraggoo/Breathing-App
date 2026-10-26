@@ -2,11 +2,21 @@
 // This is a placeholder implementation - in a real app, you would use actual audio files
 
 export class AudioGenerator {
-  private static audioContext: AudioContext | null = null;
+  private static audioContext: any = null;
 
-  private static getAudioContext(): AudioContext {
+  private static getAudioContext(): any {
+    // Check if we're in a React Native environment
+    if (typeof window === 'undefined') {
+      return null; // AudioContext not available in React Native
+    }
+    
     if (!AudioGenerator.audioContext) {
-      AudioGenerator.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      try {
+        AudioGenerator.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      } catch (error) {
+        console.log('AudioContext not supported in this environment');
+        return null;
+      }
     }
     return AudioGenerator.audioContext;
   }
@@ -14,6 +24,11 @@ export class AudioGenerator {
   public static playTone(frequency: number, duration: number, volume: number = 0.3): void {
     try {
       const audioContext = AudioGenerator.getAudioContext();
+      if (!audioContext) {
+        // Audio not supported in this environment (e.g., React Native)
+        return;
+      }
+
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -30,6 +45,7 @@ export class AudioGenerator {
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + duration);
     } catch (error) {
+      // Silently handle audio errors - this is expected in React Native
       console.log('Audio generation not supported:', error);
     }
   }

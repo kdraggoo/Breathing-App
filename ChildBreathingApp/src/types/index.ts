@@ -8,6 +8,13 @@ export interface BreathingExercise {
   color: string;
 }
 
+export interface DandelionState {
+  petalCount: number; // 0-40
+  seedCount: number; // 0-40
+  phase: 'inhale' | 'hold' | 'exhale';
+  progress: number; // 0-1 within current phase
+}
+
 export interface ExerciseSession {
   exerciseId: string;
   startTime: Date;
@@ -26,6 +33,7 @@ export interface UserProgress {
 
 export interface AppSettings {
   soundEnabled: boolean;
+  soundVolume: number; // 0.0 to 1.0
   vibrationEnabled: boolean;
   defaultDuration: number;
   theme: 'light' | 'dark' | 'colorful';
