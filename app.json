@@ -9,6 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.draggoo.childbreathing",
+      "appleTeamId": "LEUL2VBPN8",
       "supportsTablet": true,
       "icon": "./assets/images/icon.png",
       "config": {

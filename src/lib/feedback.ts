@@ -23,8 +23,12 @@ export function useBreathCues({ sound, haptics }: { sound: boolean; haptics: boo
           // A short exhale setting can end before the wind sound does; cut it off at the next inhale.
           if (name === 'inhale') exhale.pause();
           const player = players[name];
-          player.seekTo(0);
-          player.play();
+          // seekTo is async: playing before the rewind lands starts from the end of the last
+          // playback, so the cue would be silent every other time.
+          player
+            .seekTo(0)
+            .then(() => player.play())
+            .catch(() => {});
         }
         if (haptics) {
           const result =
