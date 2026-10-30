@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 
 import { Balloon } from '@/components/balloon';
 import { Bubbles } from '@/components/bubbles';
+import { Candles } from '@/components/candles';
 import { Clouds } from '@/components/clouds';
 import { Dandelion } from '@/components/dandelion';
 import { Pinwheel } from '@/components/pinwheel';
@@ -70,6 +71,14 @@ export const SCENES: Scene[] = [
     Visual: Balloon,
     hints: { inhale: 'Slowly fill the balloon', exhale: 'Let it drift over the hills', holdOut: 'Float along' },
     done: () => 'Your balloon floated all the way across the sky.',
+  },
+  {
+    id: 'candles',
+    name: 'Birthday Candles',
+    tagline: 'Breathe in slowly, then blow out the birthday candles.',
+    Visual: Candles,
+    hints: { exhale: 'Blow out the candles', holdOut: 'Make a wish' },
+    done: (n) => `You blew out the candles ${n} times.`,
   },
 ];
 

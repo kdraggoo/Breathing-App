@@ -12,8 +12,10 @@ export const colors = {
   button: '#2F7D4F',
   buttonText: '#FFFFFF',
   card: 'rgba(255,255,255,0.96)',
-  dotEmpty: 'rgba(255,255,255,0.55)',
-  dotFull: '#FFFFFF',
+  // Breath counter dots; the outline keeps them visible on both sky and light indoor scenes.
+  dotEmpty: 'rgba(255,255,255,0.6)',
+  dotFull: '#2F7D4F',
+  dotOutline: 'rgba(34,50,77,0.3)',
 };
 
 /** Seconds for each phase of one breath, in order: inhale, hold, exhale, holdOut (hold after exhaling). */
@@ -36,7 +38,7 @@ export const PRESETS: { label: string; durations: PhaseDurations }[] = [
 
 export const BREATH_COUNTS = [3, 5, 8, 10];
 
-export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles', 'pinwheel', 'sailboat', 'balloon'] as const;
+export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles', 'pinwheel', 'sailboat', 'balloon', 'candles'] as const;
 export type SceneId = (typeof SCENE_IDS)[number];
 
 export const sunColors = {
@@ -96,4 +98,23 @@ export const balloonColors = {
   weave: '#7A4B28',
   flameOuter: '#FF8C42',
   flameInner: '#FFE066',
+};
+
+export const candleColors = {
+  wallTop: '#FFF6E5',
+  wallBottom: '#FFE3C2',
+  string: '#C9A27E',
+  bunting: ['#FF6B6B', '#FFD93D', '#4D96FF', '#6BCB77', '#C77DFF'],
+  table: '#E3A977',
+  tableEdge: '#C98A57',
+  confetti: '#FF6B6B',
+  plate: '#FFFFFF',
+  cake: '#F7D9B5',
+  frosting: '#FF9EC4',
+  candles: ['#FF6B6B', '#4D96FF', '#FFD93D', '#6BCB77', '#C77DFF'],
+  wick: '#3A2E2A',
+  flameOuter: '#FFB703',
+  flameInner: '#FFF3B0',
+  glow: '#FFD27A',
+  smoke: '#B9B4AE',
 };

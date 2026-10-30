@@ -229,8 +229,15 @@ const styles = StyleSheet.create({
   close: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   closeText: { fontSize: 22, color: colors.ink, fontWeight: '700' },
   dots: { flexDirection: 'row', gap: 8, flexShrink: 1, flexWrap: 'wrap', justifyContent: 'center' },
-  dot: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.dotEmpty },
-  dotFull: { backgroundColor: colors.dotFull },
+  dot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.dotEmpty,
+    borderWidth: 1,
+    borderColor: colors.dotOutline,
+  },
+  dotFull: { backgroundColor: colors.dotFull, borderColor: colors.dotFull },
   center: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
   bottom: { marginTop: 'auto', alignItems: 'center', paddingBottom: 32 },
   card: {
