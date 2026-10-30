@@ -26,13 +26,22 @@ export function phaseStep(elapsed: number, t: BreathTiming) {
   return breath * 4 + (c < t.inhaleEnd ? 0 : c < t.exhaleStart ? 1 : c < t.exhaleEnd ? 2 : 3);
 }
 
+/**
+ * Sine ease-in-out on 0..1. Animation code must use this rather than an inline arrow: the
+ * React Compiler hoists inline arrows out of worklet callbacks into plain (non-worklet)
+ * module functions, which crash when called on the UI thread.
+ */
+export function easeInOut(x: number) {
+  'worklet';
+  return 0.5 - 0.5 * Math.cos(Math.PI * x);
+}
+
 /** How full the lungs are (0..1) at `elapsed`, eased for a natural rise and fall. */
 export function breathAmount(elapsed: number, t: BreathTiming) {
   'worklet';
   const c = elapsed - Math.floor(elapsed);
-  const ease = (x: number) => 0.5 - 0.5 * Math.cos(Math.PI * x);
-  if (c < t.inhaleEnd) return ease(c / t.inhaleEnd);
+  if (c < t.inhaleEnd) return easeInOut(c / t.inhaleEnd);
   if (c < t.exhaleStart) return 1;
-  if (c < t.exhaleEnd) return 1 - ease((c - t.exhaleStart) / (t.exhaleEnd - t.exhaleStart));
+  if (c < t.exhaleEnd) return 1 - easeInOut((c - t.exhaleStart) / (t.exhaleEnd - t.exhaleStart));
   return 0;
 }

@@ -35,3 +35,17 @@ export const PRESETS: { label: string; durations: PhaseDurations }[] = [
 ];
 
 export const BREATH_COUNTS = [3, 5, 8, 10];
+
+export const SCENE_IDS = ['dandelion', 'clouds'] as const;
+export type SceneId = (typeof SCENE_IDS)[number];
+
+export const sunColors = {
+  body: '#FFC93C',
+  rays: '#FFB627',
+  glow: '#FFF1B8',
+  face: '#8A5A12',
+  cheek: '#FF9A8B',
+  cloud: '#FFFFFF',
+  cloudShade: '#DCE6EF',
+  dim: '#4A5A70',
+};

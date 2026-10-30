@@ -1,16 +1,18 @@
 import Storage from 'expo-sqlite/kv-store';
 import { useSyncExternalStore } from 'react';
 
-import { PHASE_LIMITS, PRESETS, type PhaseDurations } from '@/constants/theme';
+import { PHASE_LIMITS, PRESETS, SCENE_IDS, type PhaseDurations, type SceneId } from '@/constants/theme';
 
 export type Settings = PhaseDurations & {
   sound: boolean;
   haptics: boolean;
   breaths: number;
+  /** Last scene shown on the home screen. */
+  scene: SceneId;
 };
 
 const KEY = 'settings';
-const DEFAULTS: Settings = { sound: true, haptics: true, breaths: 5, ...PRESETS[0].durations };
+const DEFAULTS: Settings = { sound: true, haptics: true, breaths: 5, scene: 'dandelion', ...PRESETS[0].durations };
 
 function clampPhase(phase: keyof PhaseDurations, value: unknown, fallback: number) {
   const { min, max } = PHASE_LIMITS[phase];
@@ -26,6 +28,7 @@ function load(): Settings {
       sound: saved.sound,
       haptics: saved.haptics,
       breaths: saved.breaths,
+      scene: SCENE_IDS.includes(saved.scene) ? saved.scene : DEFAULTS.scene,
       inhale: clampPhase('inhale', saved.inhale, DEFAULTS.inhale),
       hold: clampPhase('hold', saved.hold, DEFAULTS.hold),
       exhale: clampPhase('exhale', saved.exhale, DEFAULTS.exhale),

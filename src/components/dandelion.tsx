@@ -3,22 +3,12 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import Svg, { Circle, Ellipse, Line, Path } from 'react-native-svg';
 
+import type { SceneVisualProps } from '@/components/scene-types';
 import { colors } from '@/constants/theme';
 import { breathAmount, type BreathTiming } from '@/lib/breath';
 
 type Timing = BreathTiming;
-
-type Props = {
-  width: number;
-  height: number;
-  /** Breaths elapsed as a float: the integer part counts breaths, the fraction is progress through one. */
-  elapsed: SharedValue<number>;
-  /** 1 while the head should stay full on the first inhale (no regrow animation). */
-  fresh: SharedValue<number>;
-  timing: Timing;
-  reduceMotion?: boolean;
-  showRing?: boolean;
-};
+type Props = SceneVisualProps;
 
 type Seed = {
   angle: number;

@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { AccessibilityInfo, AppState, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -13,11 +13,11 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scheduleOnRN, scheduleOnUI } from 'react-native-worklets';
 
-import { Dandelion } from '@/components/dandelion';
 import { Sky } from '@/components/sky';
 import { colors } from '@/constants/theme';
 import { breathTiming, type Phase, PHASES, phaseStep } from '@/lib/breath';
 import { useBreathCues } from '@/lib/feedback';
+import { getScene } from '@/lib/scenes';
 import { useSettings } from '@/lib/settings';
 
 type Status = 'ready' | 'running' | 'paused' | 'done';
@@ -25,7 +25,7 @@ type Status = 'ready' | 'running' | 'paused' | 'done';
 const PROMPTS: Record<Phase, { title: string; hint: string }> = {
   inhale: { title: 'Breathe in', hint: 'Slowly, through your nose' },
   hold: { title: 'Hold', hint: 'Just for a moment' },
-  exhale: { title: 'Blow out', hint: 'Blow the seeds away' },
+  exhale: { title: 'Blow out', hint: 'Slowly, through your mouth' },
   holdOut: { title: 'Hold', hint: 'Rest before the next breath' },
 };
 
@@ -34,6 +34,8 @@ const READY_DELAY_MS = 1800;
 export default function Breathe() {
   const { width, height } = useWindowDimensions();
   const settings = useSettings();
+  const scene = getScene(useLocalSearchParams<{ scene?: string }>().scene);
+  const promptFor = (p: Phase) => ({ title: PROMPTS[p].title, hint: scene.hints[p] ?? PROMPTS[p].hint });
   // Fixed for the life of the screen so timing can't shift mid-session.
   const [session] = useState(() => ({
     breaths: settings.breaths,
@@ -142,12 +144,12 @@ export default function Breathe() {
         ? { title: 'Paused', hint: 'Tap anywhere to keep going' }
         : status === 'done'
           ? null
-          : PROMPTS[phase];
+          : promptFor(phase);
 
   return (
     <View style={styles.root}>
       <Sky />
-      <Dandelion
+      <scene.Visual
         width={width}
         height={height}
         elapsed={elapsed}
@@ -190,7 +192,8 @@ export default function Breathe() {
               <View style={[styles.card, styles.doneCard]}>
                 <Text style={styles.doneTitle}>You did it!</Text>
                 <Text style={styles.hint}>
-                  You blew away {session.breaths} dandelions.{'\n'}How does your body feel?
+                  {scene.done(session.breaths)}
+                  {'\n'}How does your body feel?
                 </Text>
                 <View style={styles.doneButtons}>
                   <Pressable style={[styles.button, styles.secondary]} onPress={() => router.back()} accessibilityRole="button">
