@@ -31,19 +31,30 @@ export default function Home() {
   const scene = SCENES[index];
 
   const select = (i: number) => {
+    if (i === index) return;
     setIndex(i);
     updateSettings({ scene: SCENES[i].id });
   };
 
+  // Pages are [last scene, ...scenes, first scene]. Landing on either copy jumps to the
+  // real page without animation, so swiping past either end wraps around seamlessly.
   const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const i = Math.round(e.nativeEvent.contentOffset.x / width);
-    if (i !== index && i >= 0 && i < SCENES.length) select(i);
-  };
-
-  const jumpTo = (i: number) => {
-    scroller.current?.scrollTo({ x: i * width, animated: true });
+    const page = Math.round(e.nativeEvent.contentOffset.x / width);
+    const i = (page - 1 + SCENES.length) % SCENES.length;
+    if (page === 0 || page === SCENES.length + 1) {
+      scroller.current?.scrollTo({ x: (i + 1) * width, animated: false });
+    }
     select(i);
   };
+
+  // For VoiceOver/TalkBack, which adjust the pager instead of swiping it.
+  const step = (delta: number) => {
+    const i = (index + delta + SCENES.length) % SCENES.length;
+    scroller.current?.scrollTo({ x: (i + 1) * width, animated: false });
+    select(i);
+  };
+
+  const pages = [SCENES[SCENES.length - 1], ...SCENES, SCENES[0]];
 
   return (
     <View style={styles.root}>
@@ -54,11 +65,17 @@ export default function Home() {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onScrollEnd}
         // Open on the last scene used, on both platforms.
-        onLayout={() => scroller.current?.scrollTo({ x: index * width, animated: false })}
+        onLayout={() => scroller.current?.scrollTo({ x: (index + 1) * width, animated: false })}
         style={StyleSheet.absoluteFill}
+        accessible
+        accessibilityRole="adjustable"
+        accessibilityLabel="Scene"
+        accessibilityValue={{ text: scene.name }}
+        accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+        onAccessibilityAction={(e) => step(e.nativeEvent.actionName === 'increment' ? 1 : -1)}
       >
-        {SCENES.map((s) => (
-          <View key={s.id} style={{ width, height, overflow: 'hidden' }}>
+        {pages.map((s, page) => (
+          <View key={page} style={{ width, height, overflow: 'hidden' }}>
             <Sky />
             <s.Visual width={width} height={height} elapsed={elapsed} fresh={fresh} timing={STILL} showRing={false} />
           </View>
@@ -82,20 +99,6 @@ export default function Home() {
           <Text style={styles.subtitle} pointerEvents="none">
             {scene.tagline}
           </Text>
-          <View style={styles.dots} accessibilityRole="tablist">
-            {SCENES.map((s, i) => (
-              <Pressable
-                key={s.id}
-                onPress={() => jumpTo(i)}
-                hitSlop={10}
-                accessibilityRole="tab"
-                accessibilityLabel={s.name}
-                accessibilityState={{ selected: i === index }}
-              >
-                <View style={[styles.dot, i === index && styles.dotActive]} />
-              </Pressable>
-            ))}
-          </View>
           <Pressable
             style={({ pressed }) => [styles.start, pressed && styles.pressed]}
             onPress={() => router.push({ pathname: '/breathe', params: { scene: scene.id } })}
@@ -129,9 +132,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
   },
-  dots: { flexDirection: 'row', gap: 12 },
-  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.dotEmpty },
-  dotActive: { backgroundColor: colors.dotFull, transform: [{ scale: 1.3 }] },
   start: {
     backgroundColor: colors.button,
     paddingVertical: 18,
