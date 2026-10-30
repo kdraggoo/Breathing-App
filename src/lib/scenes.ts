@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { Bubbles } from '@/components/bubbles';
 import { Clouds } from '@/components/clouds';
 import { Dandelion } from '@/components/dandelion';
+import { Pinwheel } from '@/components/pinwheel';
 import type { SceneVisualProps } from '@/components/scene-types';
 import type { SceneId } from '@/constants/theme';
 import type { Phase } from '@/lib/breath';
@@ -43,6 +44,14 @@ export const SCENES: Scene[] = [
     Visual: Bubbles,
     hints: { exhale: 'Blow gently to make bubbles', holdOut: 'Watch them float and pop' },
     done: (n) => `You blew ${n} streams of bubbles.`,
+  },
+  {
+    id: 'pinwheel',
+    name: 'Pinwheel',
+    tagline: 'Breathe in slowly, then blow to make the pinwheel spin.',
+    Visual: Pinwheel,
+    hints: { exhale: 'Blow to make it spin', holdOut: 'Watch it slow down' },
+    done: (n) => `You spun the pinwheel ${n} times.`,
   },
 ];
 

@@ -36,7 +36,7 @@ export const PRESETS: { label: string; durations: PhaseDurations }[] = [
 
 export const BREATH_COUNTS = [3, 5, 8, 10];
 
-export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles'] as const;
+export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles', 'pinwheel'] as const;
 export type SceneId = (typeof SCENE_IDS)[number];
 
 export const sunColors = {
@@ -57,4 +57,16 @@ export const bubbleColors = {
   filmC: '#A8EEFF',
   sheenPink: '#FF9BD2',
   sheenTeal: '#7FE3F0',
+};
+
+export const pinwheelColors = {
+  // [sail, folded shade] for each of the four blades
+  blades: [
+    ['#FF6B6B', '#D94F4F'],
+    ['#FFD93D', '#E0B820'],
+    ['#4D96FF', '#3576D6'],
+    ['#6BCB77', '#4FA85B'],
+  ] as const,
+  pin: '#B0B8C4',
+  stick: '#C69C6D',
 };
