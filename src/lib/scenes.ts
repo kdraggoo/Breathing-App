@@ -5,6 +5,7 @@ import { Bubbles } from '@/components/bubbles';
 import { Candles } from '@/components/candles';
 import { Clouds } from '@/components/clouds';
 import { Dandelion } from '@/components/dandelion';
+import { FrostyWindow } from '@/components/frosty-window';
 import { Pinwheel } from '@/components/pinwheel';
 import { Sailboat } from '@/components/sailboat';
 import type { SceneVisualProps } from '@/components/scene-types';
@@ -79,6 +80,14 @@ export const SCENES: Scene[] = [
     Visual: Candles,
     hints: { exhale: 'Blow out the candles', holdOut: 'Make a wish' },
     done: (n) => `You blew out the candles ${n} times.`,
+  },
+  {
+    id: 'window',
+    name: 'Frosty Window',
+    tagline: 'Breathe in slowly, then breathe a warm "haaa" to fog up the window.',
+    Visual: FrostyWindow,
+    hints: { exhale: 'Breathe a warm "haaa" on the window', holdOut: 'Watch the fog fade' },
+    done: (n) => `You fogged up the window ${n} times.`,
   },
 ];
 

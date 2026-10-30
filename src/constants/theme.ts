@@ -38,7 +38,7 @@ export const PRESETS: { label: string; durations: PhaseDurations }[] = [
 
 export const BREATH_COUNTS = [3, 5, 8, 10];
 
-export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles', 'pinwheel', 'sailboat', 'balloon', 'candles'] as const;
+export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles', 'pinwheel', 'sailboat', 'balloon', 'candles', 'window'] as const;
 export type SceneId = (typeof SCENE_IDS)[number];
 
 export const sunColors = {
@@ -117,4 +117,21 @@ export const candleColors = {
   flameInner: '#FFF3B0',
   glow: '#FFD27A',
   smoke: '#B9B4AE',
+};
+
+export const windowColors = {
+  wall: '#E9DFD1',
+  frame: '#FFFFFF',
+  frameShade: '#E3E8EE',
+  sill: '#C89F7A',
+  skyTop: '#2B3A67',
+  skyBottom: '#6278A8',
+  snow: '#F2F7FC',
+  snowShade: '#C9D8E8',
+  pine: '#2F5D50',
+  scarf: '#E63946',
+  carrot: '#F4A261',
+  fog: '#FFFFFF',
+  // Clear glass showing through a finger line in the fog.
+  clearLine: '#3B4E80',
 };
