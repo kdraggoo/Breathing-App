@@ -36,7 +36,7 @@ export const PRESETS: { label: string; durations: PhaseDurations }[] = [
 
 export const BREATH_COUNTS = [3, 5, 8, 10];
 
-export const SCENE_IDS = ['dandelion', 'clouds'] as const;
+export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles'] as const;
 export type SceneId = (typeof SCENE_IDS)[number];
 
 export const sunColors = {
@@ -48,4 +48,13 @@ export const sunColors = {
   cloud: '#FFFFFF',
   cloudShade: '#DCE6EF',
   dim: '#4A5A70',
+};
+
+export const bubbleColors = {
+  wand: '#FF6FA8',
+  filmA: '#FFC6E5',
+  filmB: '#C9B8FF',
+  filmC: '#A8EEFF',
+  sheenPink: '#FF9BD2',
+  sheenTeal: '#7FE3F0',
 };

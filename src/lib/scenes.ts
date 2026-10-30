@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 
+import { Bubbles } from '@/components/bubbles';
 import { Clouds } from '@/components/clouds';
 import { Dandelion } from '@/components/dandelion';
 import type { SceneVisualProps } from '@/components/scene-types';
@@ -34,6 +35,14 @@ export const SCENES: Scene[] = [
     Visual: Clouds,
     hints: { exhale: 'Blow the clouds away', holdOut: 'Feel the warm sunshine' },
     done: (n) => `You found the sun ${n} times.`,
+  },
+  {
+    id: 'bubbles',
+    name: 'Bubbles',
+    tagline: 'Breathe in slowly, then blow gently to make bubbles.',
+    Visual: Bubbles,
+    hints: { exhale: 'Blow gently to make bubbles', holdOut: 'Watch them float and pop' },
+    done: (n) => `You blew ${n} streams of bubbles.`,
   },
 ];
 
