@@ -155,6 +155,7 @@ export default function Breathe() {
         elapsed={elapsed}
         fresh={fresh}
         timing={session}
+        breaths={session.breaths}
         reduceMotion={reduceMotion}
       />
       <Pressable

@@ -1,9 +1,10 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 
 import type { SceneVisualProps } from '@/components/scene-types';
+import { WindStreak } from '@/components/wind-streak';
 import { pinwheelColors } from '@/constants/theme';
 import { breathAmount, type BreathTiming } from '@/lib/breath';
 
@@ -64,7 +65,18 @@ export function Pinwheel({ width, height, elapsed, fresh, timing, reduceMotion =
       )}
       <Stick width={width} height={height} cx={cx} cy={cy} R={R} />
       {[0, 1, 2].map((i) => (
-        <WindStreak key={i} index={i} R={R} cx={cx} cy={cy} elapsed={elapsed} timing={timing} />
+        <WindStreak
+          key={i}
+          index={i}
+          count={3}
+          left={cx - R * 1.9}
+          top={cy + R * (0.55 + i * 0.28)}
+          width={R * 0.9}
+          angle={-22}
+          travel={R * 0.9}
+          elapsed={elapsed}
+          timing={timing}
+        />
       ))}
       <Animated.View style={[box(R), bladesStyle]}>
         <Blades R={R} />
@@ -73,56 +85,6 @@ export function Pinwheel({ width, height, elapsed, fresh, timing, reduceMotion =
         <Circle cx={R * 0.12} cy={R * 0.12} r={R * 0.09} fill="#FFFFFF" stroke={pinwheelColors.pin} strokeWidth={R * 0.03} />
       </Svg>
     </View>
-  );
-}
-
-type WindStreakProps = {
-  index: number;
-  R: number;
-  cx: number;
-  cy: number;
-  elapsed: SharedValue<number>;
-  timing: BreathTiming;
-};
-
-// A wavy gust line flowing in from the lower left toward the blades while blowing.
-function WindStreak({ index, R, cx, cy, elapsed, timing }: WindStreakProps) {
-  const w = R * 0.9;
-  const style = useAnimatedStyle(() => {
-    const c = elapsed.value - Math.floor(elapsed.value);
-    if (c < timing.exhaleStart || c >= timing.exhaleEnd) return { opacity: 0, transform: [{ translateX: 0 }] };
-    const e = (c - timing.exhaleStart) / (timing.exhaleEnd - timing.exhaleStart);
-    const local = (e * 2 + index / 3) % 1;
-    return {
-      opacity: 0.85 * Math.sin(Math.PI * local) * Math.sin(Math.PI * e),
-      transform: [{ translateX: local * R * 0.9 }],
-    };
-  });
-  return (
-    <Animated.View
-      style={[
-        {
-          position: 'absolute',
-          left: cx - R * 1.9,
-          top: cy + R * (0.55 + index * 0.28),
-          width: w,
-          height: 20,
-          transform: [{ rotate: '-22deg' }],
-        },
-      ]}
-    >
-      <Animated.View style={style}>
-        <Svg width={w} height={20}>
-          <Path
-            d={`M2 10 Q${w * 0.25} 2 ${w * 0.5} 10 T${w - 2} 10`}
-            stroke="#FFFFFF"
-            strokeWidth={3}
-            strokeLinecap="round"
-            fill="none"
-          />
-        </Svg>
-      </Animated.View>
-    </Animated.View>
   );
 }
 

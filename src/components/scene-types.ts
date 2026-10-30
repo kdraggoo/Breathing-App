@@ -13,4 +13,6 @@ export type SceneVisualProps = {
   timing: BreathTiming;
   reduceMotion?: boolean;
   showRing?: boolean;
+  /** Breaths in the session; scenes that travel use it to arrive on the last breath. Absent on the home preview. */
+  breaths?: number;
 };

@@ -36,7 +36,7 @@ export const PRESETS: { label: string; durations: PhaseDurations }[] = [
 
 export const BREATH_COUNTS = [3, 5, 8, 10];
 
-export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles', 'pinwheel'] as const;
+export const SCENE_IDS = ['dandelion', 'clouds', 'bubbles', 'pinwheel', 'sailboat', 'balloon'] as const;
 export type SceneId = (typeof SCENE_IDS)[number];
 
 export const sunColors = {
@@ -69,4 +69,31 @@ export const pinwheelColors = {
   ] as const,
   pin: '#B0B8C4',
   stick: '#C69C6D',
+};
+
+export const sailColors = {
+  waterTop: '#6EC1E4',
+  waterBottom: '#2F84B8',
+  shore: '#7FB77E',
+  sand: '#F4D58D',
+  trunk: '#8D6E4A',
+  palm: '#3E9B4F',
+  hull: '#E76F51',
+  mast: '#6D4C35',
+  sail: '#FFFFFF',
+  sailEdge: '#D9E2EA',
+  stripe: '#F4A261',
+  flag: '#E63946',
+};
+
+export const balloonColors = {
+  outer: '#EF476F',
+  middle: '#FFD166',
+  inner: '#06D6A0',
+  band: '#8D6E4A',
+  rope: '#6D4C35',
+  basket: '#A0663B',
+  weave: '#7A4B28',
+  flameOuter: '#FF8C42',
+  flameInner: '#FFE066',
 };

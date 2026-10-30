@@ -36,6 +36,20 @@ export function easeInOut(x: number) {
   return 0.5 - 0.5 * Math.cos(Math.PI * x);
 }
 
+/**
+ * Progress (0..1) of a scene that travels over a session: it advances only from the start of
+ * each exhale to the end of the breath, easing to a stop, and reaches 1 on the last breath.
+ * Without a session length (the home preview) it stays at 0.
+ */
+export function journey(elapsed: number, t: BreathTiming, breaths: number) {
+  'worklet';
+  if (!breaths) return 0;
+  const k = Math.floor(elapsed);
+  const c = elapsed - k;
+  const within = c < t.exhaleStart ? 0 : easeInOut((c - t.exhaleStart) / (1 - t.exhaleStart));
+  return Math.min(1, (k + within) / breaths);
+}
+
 /** How full the lungs are (0..1) at `elapsed`, eased for a natural rise and fall. */
 export function breathAmount(elapsed: number, t: BreathTiming) {
   'worklet';
